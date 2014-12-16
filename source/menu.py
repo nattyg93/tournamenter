@@ -1,9 +1,9 @@
 #Author: Nathanael Gordon
 #Created: 2014-12-16
 
-Class Menu:
+class Menu:
     
-    def __init__(self, exitString = "Return to previous menu"):
+    def __init__(self, exitString = "Return to previous menu", title = "Tournamenter"):
         self.options = []
         self.exitString = exitString
     
@@ -12,13 +12,10 @@ Class Menu:
         
         while not validResult:
             count = 0
-            result = 0
+            result = -1
             for tup, func in self.options:
-                if count == 0:
-                    print("{0}\n".format(tup))
-                else:
-                    print("{0} - {1}".format(count, tup))
                 count += 1
+                print("{0} - {1}".format(count, tup))
                 
             print("0 - {0}\n".format(self.exitString))
             
@@ -31,7 +28,7 @@ Class Menu:
             except ValueError:
                 print("\nPlease enter a number in the range of 0 - {0}\n".format(count-1))
             
-        return self.options[1](values)
+        return self.options[result][1](values, result)
     
     def addOption(self, string, func):
         self.options.append((string, func))
