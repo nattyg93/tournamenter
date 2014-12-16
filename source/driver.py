@@ -3,6 +3,7 @@
 #Created: 2014-11-19
 
 from tournament import Tournament
+from constants import *
 from menu import Menu
 from menu import confirm
 from race import Race
@@ -187,7 +188,6 @@ def tournamentMenu(t):
             tDB.endTournament(t)
             return 0
 
-
 # @param t: Tournament
 # @param r: Race
 #NOTE: This needs to be broken up in MANY smaller functions.
@@ -340,9 +340,9 @@ def createTournament(values, result):
     currentTournament = createNewTournament()
 
     tDB.addTournament(currentTournament)
-    values[TOURNAMENT] = currentTournament
+    setCurrentTournament(values, currentTournament)
     tournamentMenu.printMenu(values)
-    
+
 def selectExistingTournament(values, result):
     tournaments = tDB.tournaments
     
@@ -363,30 +363,41 @@ def selectExistingTournament(values, result):
             if confirm("This tournament is closed. Do you want to open it?"):
                 tDB.openTournament(tournament)
         
-        values[TOURNAMENT] = tournament
+        setCurrentTournament(values, currentTournament)
         tournamentMenu.printMenu(values)
+
+def setCurrentTournament(values, tournament):
+    values[TOURNAMENT] = tournament
+    tournamentMenu.title = "Tournament Menu:\nGame - {0}".format(values[TOURNAMENT].gameName)
 
 def replaceMeWithAppropriateFunction(values, result):
     print("I need to replaced with an appropriate function")
 
+values = {}
+
+topMenu = Menu("Exit")
+topMenu.addOption("Create new tournament", createTournament)
+topMenu.addOption("Select existing tournament", selectExistingTournament)
+topMenu.addOption("Create new racer", createRacer)
+
+tournamentMenu = Menu()
+tournamentMenu.addOption("Add racer", replaceMeWithAppropriateFunction)
+tournamentMenu.addOption("Remove racer", replaceMeWithAppropriateFunction)
+tournamentMenu.addOption("Generate race", replaceMeWithAppropriateFunction)
+tournamentMenu.addOption("Remove race", replaceMeWithAppropriateFunction)
+tournamentMenu.addOption("Show leader board", replaceMeWithAppropriateFunction)
+tournamentMenu.addOption("End Tournament", replaceMeWithAppropriateFunction)
+
+
 if __name__ == "__main__":
-    values = {}
-    
     tDB = TournamenterDatabase()
     tDB.populateRacers()
     tDB.populateRaces()
     tDB.populateTournaments()
     
-    topMenu = Menu("Exit")
-    topMenu.addOption("Create new tournament", createTournament)
-    topMenu.addOption("Select existing tournament", selectExistingTournament)
-    topMenu.addOption("Create new racer", createRacer)
-    topMenu.printMenu(values)
+    result = 0
     
-    tournamentMenu = menu("Tournament Menu:\nGame - {0}".format(values[TOURNAMENT].gameName))
-    tournamentMenu.addOption("Add racer", replaceMeWithAppropriateFunction)
-    tournamentMenu.addOption("Remove racer", replaceMeWithAppropriateFunction)
-    tournamentMenu.addOption("Generate race", replaceMeWithAppropriateFunction)
-    tournamentMenu.addOption("Remove race", replaceMeWithAppropriateFunction)
-    tournamentMenu.addOption("Show leader board", replaceMeWithAppropriateFunction)
-    tournamentMenu.addOption("End Tournament", replaceMeWithAppropriateFunction)
+    while True:
+        result = topMenu.printMenu(values)
+        print("result is: {0}".format(result))
+    
