@@ -3,6 +3,8 @@
 #Created: 2014-11-19
 
 from tournament import Tournament
+from menu import Menu
+from menu import confirm
 from race import Race
 from racer import Racer
 from databaseInterface import *
@@ -39,49 +41,6 @@ def printMenu(strings = None, exitString = "Return to previous menu"):
             print("\nPlease enter a number in the range of 0 - {0}\n".format(count-1))
         
     return result
-        
-def createNewRacer():
-    racerName = input("Enter Racer Name: ")
-    
-    confirmMenu = []
-    
-    confirmMenu.append("Create racer with the name \"{0}\"?".format(racerName))
-    confirmMenu.append("Yes")
-    selection = printMenu(confirmMenu, "No")
-    
-    if selection == 1:
-        racer = Racer(racerName)
-    else:
-        racer = None
-        print("Cancelled")
-        
-    return racer
-
-def createNewTournament():
-    gameName = input("Enter Game Name: ")
-    maxRacers = 0
-    while maxRacers < 1:
-        try:
-            maxRacers = int(input("Enter the maximum number of racers per race: "))
-            if maxRacers < 1:
-                raise ValueError()
-        except ValueError:
-            print("\nPlease enter a number greater than 0.\n")
-    
-    confirmMenu = []
-    
-    confirmMenu.append("Create tournament with the name \"{0}\" and a maximum of {1} racers?".format(gameName, maxRacers))
-    confirmMenu.append("Yes")
-    selection = printMenu(confirmMenu, "No")
-    
-    if selection == 1:
-        t = Tournament(gameName, maxRacers)
-    else:
-        t = None
-        print("Cancelled")
-    
-    return t
-
 
 def topMenu():
     while True:
@@ -331,10 +290,103 @@ def raceMenu(t, r):
                     
             tDB.addRace(r, t)
 
+def createNewRacer():
+    racerName = input("Enter Racer Name: ")
+    
+    if confirm("Create racer with the name \"{0}\"?".format(racerName)):
+        racer = Racer(racerName)
+    else:
+        racer = None
+        print("Cancelled")
+        
+    return racer
+
+# @param values: a dictionary
+# @param result: an integer indicating what the user entered
+def createRacer(values, result):
+    newRacer = createNewRacer()
+    
+    if newRacer is not None:
+        try:
+            tDB.addRacer(newRacer)
+        except mysql.connector.Error as err:
+            if err.errno == errorcode.ER_DUP_ENTRY:
+                print("\nRacer with the name \"{0}\" already exists.\n".format(newRacer.racerName))
+            else:
+                raise err
+            
+def createNewTournament():
+    gameName = input("Enter Game Name: ")
+    maxRacers = 0
+    while maxRacers < 1:
+        try:
+            maxRacers = int(input("Enter the maximum number of racers per race: "))
+            if maxRacers < 1:
+                raise ValueError()
+        except ValueError:
+            print("\nPlease enter a number greater than 0.\n")
+    
+    if confirm("Create tournament with the name \"{0}\" and a maximum of {1} racers?".format(gameName, maxRacers)):
+        t = Tournament(gameName, maxRacers)
+    else:
+        t = None
+        print("Cancelled")
+    
+    return t
+
+# @param values: a dictionary
+# @param result: an integer indicating what the user entered
+def createTournament(values, result):
+    currentTournament = createNewTournament()
+
+    tDB.addTournament(currentTournament)
+    values[TOURNAMENT] = currentTournament
+    tournamentMenu.printMenu(values)
+    
+def selectExistingTournament(values, result):
+    tournaments = tDB.tournaments
+    
+    if confirm("Select open tournament?", "Open", "Closed"):
+        selectedTournaments = [tournament for tournament in tournaments if tournament.timeEnded is None] # returns list of open tournaments
+    else:
+        selectedTournaments = [tournament for tournament in tournaments if tournament.timeEnded is not None] # returns list of closed tournaments
+        
+        existingTournamentMenu = Menu("Select the tournament", "Cancel")
+        
+        for tournament in selectedTournaments:
+            existingTournamentMenu.addOption(tournament.toString(), lambda x: x - 1)
+        
+        existingTournamentMenu.printMenu(values)
+        
+        tournament = selectedTournaments[selection]
+        if tournament.timeEnded is not None:
+            if confirm("This tournament is closed. Do you want to open it?"):
+                tDB.openTournament(tournament)
+        
+        values[TOURNAMENT] = tournament
+        tournamentMenu.printMenu(values)
+
+def replaceMeWithAppropriateFunction(values, result):
+    print("I need to replaced with an appropriate function")
+
 if __name__ == "__main__":
+    values = {}
+    
     tDB = TournamenterDatabase()
     tDB.populateRacers()
     tDB.populateRaces()
     tDB.populateTournaments()
-    topMenu()
     
+    topMenu = Menu("Exit")
+    topMenu.addOption("Create new tournament", createTournament)
+    topMenu.addOption("Select existing tournament", selectExistingTournament)
+    topMenu.addOption("Create new racer", createRacer)
+    topMenu.printMenu(values)
+    
+    tournamentMenu = menu("Tournament Menu:\nGame - {0}".format(values[TOURNAMENT].gameName))
+    tournamentMenu.addOption("Add racer", replaceMeWithAppropriateFunction)
+    tournamentMenu.addOption("Remove racer", replaceMeWithAppropriateFunction)
+    tournamentMenu.addOption("Generate race", replaceMeWithAppropriateFunction)
+    tournamentMenu.addOption("Remove race", replaceMeWithAppropriateFunction)
+    tournamentMenu.addOption("Show leader board", replaceMeWithAppropriateFunction)
+    tournamentMenu.addOption("End Tournament", replaceMeWithAppropriateFunction)
