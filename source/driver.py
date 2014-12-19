@@ -113,7 +113,7 @@ def updateRaceMenuHeader(values):
     race = values[RACE]
     header = "Race Menu:\nGame - {0}".format(t.gameName)
     for racer in race.racers:
-        header += "\n   * {0} - {1}pts".format(racer[0].racerName, racer[1])
+        header += "\n   * {0} - {1}pts".format(racer[0].racerName, racer[0].score)
     
     raceMenu.title = header
 
@@ -176,7 +176,7 @@ def removeRacerFromRace(values, result):
     replaceRacerMenu = Menu("Cancel", "Select racer to remove")
     
     for racer in racers:
-        replaceRacerMenu.addOption("{0} - {1}pts".format(racer[0].racerName, racer[1]), SUBTRACT_ONE)
+        replaceRacerMenu.addOption("{0} - {1}pts".format(racer[0].racerName, racer[0].score), SUBTRACT_ONE)
     
     selection = replaceRacerMenu.printMenu(values)
     
@@ -233,9 +233,8 @@ def replaceRacerInRace(values, result):
     r = values[RACE]
     t = values[TOURNAMENT]
     replaceRacerMenu = Menu("Cancel", "Select racer to replace")
-    
     for racer in r.racers:
-        replaceRacerMenu.addOption("{0} - {1}pts".format(racer[0].racerName, racer[1]), SUBTRACT_ONE)
+        replaceRacerMenu.addOption("{0} - {1}pts".format(racer[0].racerName, racer[0].score), SUBTRACT_ONE)
     
     selection = replaceRacerMenu.printMenu(values)
     
@@ -244,11 +243,12 @@ def replaceRacerInRace(values, result):
         
         replaceRacerMenu = Menu("Cancel", "Select racer to add")
         # This allows adding duplicates to a race.
-        racers = [racer for racer in t.racers if racer not in (racer2[0] for racer2 in r.racers)] #TODO: order this list so it is in order of who is most suitable for this race
+        racers = [racer for racer in t.racers if racer not in (racer2[0] for racer2 in r.racers)]
+        
+        racers = t.sortOptimal([racer[0] for racer in racers])
         
         for racer in racers:
-            # I am not sure how score is been tracked in the tournament class.
-            replaceRacerMenu.addOption("{0}".format(racer.racerName), SUBTRACT_ONE)
+            replaceRacerMenu.addOption("{0} - {1}pts".format(racer[0].racerName, racer[0].score), SUBTRACT_ONE)
             
         selection = replaceRacerMenu.printMenu(values)
         
@@ -257,6 +257,10 @@ def replaceRacerInRace(values, result):
             r.replaceRacer(toReplace, toAdd)
         
         updateRaceMenuHeader(values)
+
+def printLastRaced(values, result):
+    for racer in values[TOURNAMENT].racers:
+        print("{0}: {1}".format(racer.racerName, values[TOURNAMENT].racesSinceLastRaced(racer)))
 
 def replaceMeWithAppropriateFunction(values, result):
     print("I need to replaced with an appropriate function")
@@ -274,7 +278,7 @@ tournamentMenu.addOption("Add racer", addRacerToTournament)
 tournamentMenu.addOption("Remove racer", removeRacerFromTournament)
 tournamentMenu.addOption("Generate race", generateNewRace)
 tournamentMenu.addOption("Remove race", removeRace)
-tournamentMenu.addOption("Show leader board", replaceMeWithAppropriateFunction)
+tournamentMenu.addOption("Show leader board", printLastRaced)
 tournamentMenu.addOption("End tournament", endTournament)
 
 raceMenu = Menu("Cancel race")
