@@ -113,7 +113,7 @@ def updateRaceMenuHeader(values):
     race = values[RACE]
     header = "Race Menu:\nGame - {0}".format(t.gameName)
     for racer in race.racers:
-        header += "\n   * {0} - {1}pts".format(racer[0].racerName, racer[0].score)
+        header += "\n   * {0} - {1}/{2}pts".format(racer[0].racerName, racer[0].score, round(t.calculateAverageScore(racer[0]), 2))
     
     raceMenu.title = header
 
@@ -171,12 +171,13 @@ def removeRace(values, result):
 
 def removeRacerFromRace(values, result):
     r = values[RACE]
+    t = values[TOURNAMENT]
     racers = r.racers
             
     replaceRacerMenu = Menu("Cancel", "Select racer to remove")
     
     for racer in racers:
-        replaceRacerMenu.addOption("{0} - {1}pts".format(racer[0].racerName, racer[0].score), SUBTRACT_ONE)
+        replaceRacerMenu.addOption("{0} - {1}/{2}pts".format(racer[0].racerName, racer[0].score, round(t.calculateAverageScore(racer[0]), 2)), SUBTRACT_ONE)
     
     selection = replaceRacerMenu.printMenu(values)
     
@@ -234,7 +235,7 @@ def replaceRacerInRace(values, result):
     t = values[TOURNAMENT]
     replaceRacerMenu = Menu("Cancel", "Select racer to replace")
     for racer in r.racers:
-        replaceRacerMenu.addOption("{0} - {1}pts".format(racer[0].racerName, racer[0].score), SUBTRACT_ONE)
+        replaceRacerMenu.addOption("{0} - {1}/{2}pts".format(racer[0].racerName, racer[0].score, round(t.calculateAverageScore(racer[0]), 2)), SUBTRACT_ONE)
     
     selection = replaceRacerMenu.printMenu(values)
     
@@ -245,10 +246,10 @@ def replaceRacerInRace(values, result):
         # This allows adding duplicates to a race.
         racers = [racer for racer in t.racers if racer not in (racer2[0] for racer2 in r.racers)]
         
-        racers = t.sortOptimal([racer[0] for racer in racers])
+        racers = t.sortOptimal(racers)
         
         for racer in racers:
-            replaceRacerMenu.addOption("{0} - {1}pts".format(racer[0].racerName, racer[0].score), SUBTRACT_ONE)
+            replaceRacerMenu.addOption("{0} - {1}/{2}pts".format(racer.racerName, racer.score, round(t.calculateAverageScore(racer), 2)), SUBTRACT_ONE)
             
         selection = replaceRacerMenu.printMenu(values)
         
@@ -261,6 +262,14 @@ def replaceRacerInRace(values, result):
 def printLastRaced(values, result):
     for racer in values[TOURNAMENT].racers:
         print("{0}: {1}".format(racer.racerName, values[TOURNAMENT].racesSinceLastRaced(racer)))
+
+def printLeaderBoard(values, result):
+    t = values[TOURNAMENT]
+    racers = sorted(t.racers, key = lambda x: (0-t.calculateAverageScore(x), 0-x.score))
+    
+    for racer in racers:
+        score, numRaces = t.calculateScore(racer)
+        print("{0} - Mean: {1}pts - Total: {2}pts - Been in {3} races - Raced {4} race(s) ago".format(racer.racerName, round(t.calculateAverageScore(racer),2), score, numRaces, t.racesSinceLastRaced(racer)))
 
 def replaceMeWithAppropriateFunction(values, result):
     print("I need to replaced with an appropriate function")
@@ -278,7 +287,7 @@ tournamentMenu.addOption("Add racer", addRacerToTournament)
 tournamentMenu.addOption("Remove racer", removeRacerFromTournament)
 tournamentMenu.addOption("Generate race", generateNewRace)
 tournamentMenu.addOption("Remove race", removeRace)
-tournamentMenu.addOption("Show leader board", printLastRaced)
+tournamentMenu.addOption("Show leader board", printLeaderBoard)
 tournamentMenu.addOption("End tournament", endTournament)
 
 raceMenu = Menu("Cancel race")
