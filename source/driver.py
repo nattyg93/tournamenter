@@ -43,78 +43,6 @@ def printMenu(strings = None, exitString = "Return to previous menu"):
         
     return result
 
-def topMenu():
-    while True:
-        
-        topMenu = []
-
-        topMenu.append("Tournamenter:")                     # Menu Title
-        topMenu.append("Create new tournament")             # 1
-        topMenu.append("Select existing tournament")        # 2
-        topMenu.append("Create new racer")                  # 3
-        
-        selection = printMenu(topMenu, "Exit")
-        
-        if selection == 0:
-            # NTS: commit changes to db? or should I do that as soon as changes are made?? (probably the second option)
-            return 0
-        elif selection == 1:  # creat new tournament
-            currentTournament = createNewTournament()
-            if currentTournament is not None:
-                tDB.addTournament(currentTournament)
-                tournamentMenu(currentTournament)
-        elif selection == 2:  # select existing tournament
-            tournaments = tDB.tournaments
-            existingTournamentMenu = []
-            existingTournamentMenu.append("Select open or closed tournament?")
-            existingTournamentMenu.append("Open")           # 1
-            existingTournamentMenu.append("Closed")         # 2
-            
-            selection = printMenu(existingTournamentMenu, "Cancel")
-            
-            if selection > 0:
-                if selection == 1:
-                    selectedTournaments = [tournament for tournament in tournaments if tournament.timeEnded is None]
-                else:
-                    selectedTournaments = [tournament for tournament in tournaments if tournament.timeEnded is not None]
-                
-                existingTournamentMenu = []
-                existingTournamentMenu.append("Select the tournament")
-                for tournament in selectedTournaments:
-                    existingTournamentMenu.append(tournament.toString())
-                
-                selection = printMenu(existingTournamentMenu, "Cancel")
-                
-                if selection > 0:
-                    tournament = selectedTournaments[selection - 1]
-                    if tournament.timeEnded is not None:
-                        openTheTournamentMenu = []
-                        openTheTournamentMenu.append("This tournament is closed. Do you want to open it?")
-                        openTheTournamentMenu.append("Yes")
-                        
-                        selection = printMenu(openTheTournamentMenu, "No")
-                        
-                        if selection == 1:
-                            tDB.openTournament(tournament)
-                    
-                    currentTournament = tournament
-                    tournamentMenu(currentTournament)
-                        
-            if selection == 0:
-                print("Cancelled")
-                
-            
-        elif selection == 3:  # create new racer
-            newRacer = createNewRacer()
-            if newRacer is not None:
-                try:
-                    tDB.addRacer(newRacer)
-                except mysql.connector.Error as err:
-                    if err.errno == errorcode.ER_DUP_ENTRY:
-                        print("\nRacer with the name \"{0}\" already exists.\n".format(newRacer.racerName))
-                    else:
-                        raise err
-
 # @param t: Tournament
 def tournamentMenu(t):
     while True:
@@ -314,7 +242,12 @@ def createRacer(values, result):
                 print("\nRacer with the name \"{0}\" already exists.\n".format(newRacer.racerName))
             else:
                 raise err
-            
+
+def listRacers(values, result):
+    print("List of existing racers:")
+    for racer in tDB.racers:
+        print(racer.toString())
+
 def createNewTournament():
     gameName = input("Enter Game Name: ")
     maxRacers = 0
@@ -338,26 +271,28 @@ def createNewTournament():
 # @param result: an integer indicating what the user entered
 def createTournament(values, result):
     currentTournament = createNewTournament()
-
-    tDB.addTournament(currentTournament)
-    setCurrentTournament(values, currentTournament)
-    tournamentMenu.printMenu(values)
+    
+    if currentTournament is not None:
+        tDB.addTournament(currentTournament)
+        setCurrentTournament(values, currentTournament)
+        tournamentMenu.printMenu(values)
 
 def selectExistingTournament(values, result):
     tournaments = tDB.tournaments
     
-    if confirm("Select open tournament?", "Open", "Closed"):
+    if confirm("Select open or closed tournament?", "Open", "Closed"):
         selectedTournaments = [tournament for tournament in tournaments if tournament.timeEnded is None] # returns list of open tournaments
     else:
         selectedTournaments = [tournament for tournament in tournaments if tournament.timeEnded is not None] # returns list of closed tournaments
         
-        existingTournamentMenu = Menu("Select the tournament", "Cancel")
-        
-        for tournament in selectedTournaments:
-            existingTournamentMenu.addOption(tournament.toString(), lambda x: x - 1)
-        
-        existingTournamentMenu.printMenu(values)
-        
+    existingTournamentMenu = Menu("Cancel", "Select the tournament:")
+    
+    for tournament in selectedTournaments:
+        existingTournamentMenu.addOption(tournament.toString(), lambda x: x - 1)
+    
+    selection = existingTournamentMenu.printMenu(values)
+    
+    if selection >= 0:
         tournament = selectedTournaments[selection]
         if tournament.timeEnded is not None:
             if confirm("This tournament is closed. Do you want to open it?"):
@@ -379,6 +314,7 @@ topMenu = Menu("Exit")
 topMenu.addOption("Create new tournament", createTournament)
 topMenu.addOption("Select existing tournament", selectExistingTournament)
 topMenu.addOption("Create new racer", createRacer)
+topMenu.addOption("List existing racers", listRacers)
 
 tournamentMenu = Menu()
 tournamentMenu.addOption("Add racer", replaceMeWithAppropriateFunction)
@@ -395,9 +331,12 @@ if __name__ == "__main__":
     tDB.populateRaces()
     tDB.populateTournaments()
     
-    result = 0
+    _result = 0
     
-    while True:
-        result = topMenu.printMenu(values)
-        print("result is: {0}".format(result))
-    
+    while not _result == -1:
+        print("\n")
+        _result = topMenu.printMenu(values)
+        
+
+
+
