@@ -148,9 +148,12 @@ def endTournament(values, result):
 
 def generateNewRace(values, result):
     t = values[TOURNAMENT]
-    race = t.generateRace()
-    setCurrentRace(values, race)
-    raceMenu.infinitePrintMenu(values)
+    if len(t.racers) == 0:
+        print("There are currently 0 racers in this tournament. There must be at least 1 racer entered in this tournament.")
+    else:
+        race = t.generateRace()
+        setCurrentRace(values, race)
+        raceMenu.infinitePrintMenu(values)
 
 def removeRace(values, result):
     t = values[TOURNAMENT] 
@@ -201,6 +204,29 @@ def addRacerToRace(values, result):
         if selection >= 0:
             r.addRacer(racers[selection])
 
+def startRace(values, result):
+    r = values[RACE]
+    t = values[TOURNAMENT]
+    if len(r.racers) == 0:
+        print("There are currently 0 racers in this race. There must be at least 1 racer in this race.")
+    else:
+        racers = r.racers.copy()
+        for count in range(1, len(racers)+1):
+            winnerMenu = Menu("Cancel", "Select racer that came in position {0}".format(count))
+            for racer in racers:
+                winnerMenu.addOption(racer[0].racerName, SUBTRACT_ONE)
+            print("Len: {0}".format(len(r.racers)))
+            selection = winnerMenu.printMenu(values)
+            
+            if selection >= 0:
+                r.setPositionForRacer(racers[selection][0], count)
+                del racers[selection]
+            else:
+                return
+            
+        tDB.addRace(r, t)
+        raceMenu._result = 0
+
 def replaceMeWithAppropriateFunction(values, result):
     print("I need to replaced with an appropriate function")
 
@@ -224,7 +250,7 @@ raceMenu = Menu("Cancel race")
 raceMenu.addOption("Replace racer", replaceMeWithAppropriateFunction)
 raceMenu.addOption("Add racer", addRacerToRace)
 raceMenu.addOption("Remove racer", removeRacerFromRace)
-raceMenu.addOption("Start race", replaceMeWithAppropriateFunction)
+raceMenu.addOption("Start race", startRace)
 
 
 if __name__ == "__main__":
@@ -276,20 +302,5 @@ def raceMenu(t, r):
                 print("Cancelled")
                 
 
-                
-        elif selection == 4:    # start a race and get racer's positions and commit to db
-            racers = r.racers.copy()
-            for count in range(1, len(racers)+1):
-                winnerMenu = []
-                winnerMenu.append("Select racer that came in position {0}".format(count))
-                for racer in racers:
-                    winnerMenu.append(racer[0].racerName)
-                
-                selection = printMenu(winnerMenu, "Cancel")
-                
-                if selection > 0:
-                    r.setPositionForRacer(racers[selection - 1][0], count)
-                    del racers[selection - 1]
-                    
-            tDB.addRace(r, t)
+
 """
