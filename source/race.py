@@ -33,13 +33,13 @@ class Race:
             if racerL[0].pk == racer1.pk:
                 racerL[0] = racer2
                 
-    # Returns the number of points the racer has (-1 is returned if racer was not in race)
+    # Returns the number of points the racer has (0 is returned if racer was not in race)
     def getPointsForRacer(self, racer, maxRacers):
         for racerL in self.racers:
             if racerL[0].pk == racer.pk:
                 return maxRacers + 1 - racerL[1]
         
-        return -1
+        return 0
         
     # Set the position of that the racer return false if the racer is not in this race
     def setPositionForRacer(self, racer, position):
