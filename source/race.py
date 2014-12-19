@@ -51,9 +51,8 @@ class Race:
         return False
     
     def toString(self):
-        stringRep = self.timeStarted.isoformat() + " Racers: "
+        stringRep = "{0} Racers: ".format(self.timeStarted.isoformat())
         
         for racer in self.racers:
-            stringRep += racer[0].racerName + " pos: " + racer[1] + ", "
-            
+            stringRep += "{0} pos: {1}, ".format(racer[0].racerName, racer[1])
         return stringRep
