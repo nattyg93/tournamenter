@@ -7,6 +7,7 @@ class Menu:
         self.options = []
         self.title = title
         self.exitString = exitString
+        self._result = None
     
     def printMenu(self, values):
         validResult = False
@@ -35,7 +36,13 @@ class Menu:
         if result > 0:
             return self.options[result - 1][1](values, result)
         else:
-            return -1
+            self._result = 0
+    
+    def infinitePrintMenu(self, values):
+        self._result = None
+        while self._result is None:
+            print("\n")
+            self.printMenu(values)
     
     def addOption(self, string, func):
         self.options.append((string, func))
