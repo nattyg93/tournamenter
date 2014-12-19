@@ -31,6 +31,20 @@ class Tournament:
                 newRace.addRacer(self.racers[index])
         return newRace
     
+    # returns the number of races since the passed racer raced
+    # 0 is returned if they were in the last race
+    # 1 if they were in the race before last etc
+    def racesSinceLastRaced(self, racer):
+        self.races.sort()
+        lastRaced = 0
+        for race in self.races:
+            lastRaced += 1
+            racers = [racer[0] for racer in race.racers]
+            if racer in racers:
+                lastRaced = 0
+                
+        return lastRaced
+    
     # Automatically replace a racer with the next most appropriate racer
     # TODO
     def replaceRacerAuto(self, race, racer):
@@ -43,18 +57,6 @@ class Tournament:
     # TODO
     def findRacersSimilarScore(self, racer):
         pass
-    
-    
-    def getLeastRecentRacer(self):
-        self.races.sort()
-        for race in self.races:
-            print(race)
-                    
-    
-    #
-    
-    
-
     
     # Calculate score of passed racer based on the list of races
     def calculateScore(self, racer):
