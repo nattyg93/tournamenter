@@ -44,7 +44,6 @@ class TournamenterDatabase:
             tournament = Tournament(result[1], result[2], result[0], result[3], result[4])
             self.tournaments.append(tournament)
         
-        tournament.generateRace()
         for t in self.tournaments:
             values = {'tournamentID':t.pk}
             self.cursor.execute(QUERY['racersStillInTournament'], values)
