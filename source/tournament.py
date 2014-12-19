@@ -25,10 +25,22 @@ class Tournament:
         #pick racers for the race with similar scores
         #pick racers for the race who haven't played recently
         #return new race
+        for racer in self.racers:
+            racer.score = self.calculateScore(racer)
+        
         newRace = Race()
+        racersSorted = self.sortOptimal(self.racers)
+        score = racersSorted[0].score
+        newRace.addRacer(racersSorted[0])
+        del racersSorted[0]
+        
+        racersSorted = self.orderBySimilarScore(score, racersSorted)
+        
+        for racer in racersSorted:
+            print("{0}, race: {1}, score: {2}".format(racer.racerName, self.racesSinceLastRaced(racer), racer.score))
         for index in range(0, self.maxRacers):
-            if index < len(self.racers):
-                newRace.addRacer(self.racers[index])
+            if index < len(racersSorted):
+                newRace.addRacer(racersSorted[index])
         return newRace
     
     # returns the number of races since the passed racer raced
@@ -45,24 +57,18 @@ class Tournament:
                 
         return lastRaced
     
-    # Automatically replace a racer with the next most appropriate racer
-    # TODO
-    def replaceRacerAuto(self, race, racer):
-        #find next most appropriate racer
-        
-        #race.replaceRacer(racer, newRacer)
-        pass
+    def sortOptimal(self, racers):
+        return sorted(racers, key = lambda x: (0-self.racesSinceLastRaced(x), x.score))  #sorted by last raced in reverse order then by the score (least points first)
     
     # Generate a list of racers ordered by closeness of their scores
-    # TODO
-    def findRacersSimilarScore(self, racer):
-        pass
+    def orderBySimilarScore(self, score, racers):
+        return sorted(racers, key = lambda x: (abs(score-x.score), 0-self.racesSinceLastRaced(x)))    #sorted by closest score then by when they last raced
     
     # Calculate score of passed racer based on the list of races
     def calculateScore(self, racer):
         score = 0
         for race in self.races:
-            score += getPointsForRacer(racer)
+            score += race.getPointsForRacer(racer, self.maxRacers)
         
         return score
     
