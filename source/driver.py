@@ -105,6 +105,13 @@ def setCurrentTournament(values, tournament):
     tournamentMenu.title = "Tournament Menu:\nGame - {0}".format(values[TOURNAMENT].gameName)
 
 def setCurrentRace(values, race):
+    t = values[TOURNAMENT]
+    header = "Race Menu:\nGame - {0}".format(t.gameName)
+    for racer in race.racers:
+        header += "\n   * {0} - {1}pts".format(racer[0].racerName, racer[1])
+    
+    raceMenu.title = header
+    
     values[RACE] = race
 
 def addRacerToTournament(values, result):
@@ -156,6 +163,20 @@ def removeRace(values, result):
     if selection >= 0:
         tDB.removeRace(t, races[selection])
 
+def removeRacerFromRace(values, result):
+    r = values[RACE]
+    racers = r.racers
+            
+    replaceRacerMenu = Menu("Cancel", "Select racer to remove")
+    
+    for racer in racers:
+        replaceRacerMenu.append("{0} - {1}pts".format(racer[0].racerName, racer[1]), SUBTRACT_ONE)
+    
+    selection = printMenu(values)
+    
+    if selection >= 0:
+        r.removeRacer(r.racers[selection])
+
 def replaceMeWithAppropriateFunction(values, result):
     print("I need to replaced with an appropriate function")
 
@@ -173,9 +194,13 @@ tournamentMenu.addOption("Remove racer", removeRacerFromTournament)
 tournamentMenu.addOption("Generate race", generateNewRace)
 tournamentMenu.addOption("Remove race", removeRace)
 tournamentMenu.addOption("Show leader board", replaceMeWithAppropriateFunction)
-tournamentMenu.addOption("End Tournament", endTournament)
+tournamentMenu.addOption("End tournament", endTournament)
 
-raceMenu = Menu()
+raceMenu = Menu("Cancel race")
+raceMenu.addOption("Replace racer", replaceMeWithAppropriateFunction)
+raceMenu.addOption("Add racer", replaceMeWithAppropriateFunction)
+raceMenu.addOption("Remove racer", removeRacerFromRace)
+raceMenu.addOption("Start race", replaceMeWithAppropriateFunction)
 
 
 if __name__ == "__main__":
@@ -194,21 +219,7 @@ if __name__ == "__main__":
 #NOTE: This needs to be broken up in MANY smaller functions.
 def raceMenu(t, r):
     while True:
-        raceMenu = []
-        header = "Race Menu:\nGame - {0}".format(t.gameName)
-        for racer in r.racers:
-            header += "\n   * {0} - {1}pts".format(racer[0].racerName, racer[1])
-        raceMenu.append(header)
-        raceMenu.append("Replace racer")                    # 1
-        raceMenu.append("Add racer")                        # 2
-        raceMenu.append("Remove racer")                     # 3
-        raceMenu.append("Start race")                       # 4
-        
-        selection = printMenu(raceMenu, "Cancel race")
-        
-        if selection == 0:
-            return 0
-                
+       
         elif selection == 1:    # Replace
             replaceRacerMenu = []
             replaceRacerMenu.append("Select racer to replace")
@@ -259,21 +270,6 @@ def raceMenu(t, r):
                     r.addRacer(racers[selection - 1])
                 else:
                     print("Cancelled")
-                
-        elif selection == 3:    # remove racer
-            racers = r.racers
-            
-            replaceRacerMenu = []
-            replaceRacerMenu.append("Select racer to remove")
-            for racer in racers:
-                replaceRacerMenu.append("{0} - {1}pts".format(racer[0].racerName, racer[1]))
-            
-            selection = printMenu(replaceRacerMenu, "Cancel")
-            
-            if selection > 0:
-                r.removeRacer(r.racers[selection - 1])
-            else:
-                print("Cancelled")
                 
         elif selection == 4:    # start a race and get racer's positions and commit to db
             racers = r.racers.copy()
