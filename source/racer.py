@@ -31,3 +31,6 @@ class Racer:
     
     def toString(self):
         return "{0}, Created: {1}".format(self.racerName, self.created)
+    
+    def __eq__(self, other):
+        return self.pk == other.pk
