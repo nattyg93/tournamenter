@@ -56,6 +56,6 @@ def confirm(questionToConfirm, yes = "Yes", no = "No"):
             
             validResult = True
         except ValueError:
-            print("\nPlease enter a number in the range of 0 - {0}\n".format(count-1))
+            print("\nPlease enter either 0 or 1.\n")
     
     return result == 1
