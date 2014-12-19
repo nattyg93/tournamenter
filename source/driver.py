@@ -105,14 +105,17 @@ def setCurrentTournament(values, tournament):
     tournamentMenu.title = "Tournament Menu:\nGame - {0}".format(values[TOURNAMENT].gameName)
 
 def setCurrentRace(values, race):
+    values[RACE] = race
+    updateRaceMenuHeader(values)
+
+def updateRaceMenuHeader(values):
     t = values[TOURNAMENT]
+    race = values[RACE]
     header = "Race Menu:\nGame - {0}".format(t.gameName)
     for racer in race.racers:
         header += "\n   * {0} - {1}pts".format(racer[0].racerName, racer[1])
     
     raceMenu.title = header
-    
-    values[RACE] = race
 
 def addRacerToTournament(values, result):
     t = values[TOURNAMENT]
@@ -156,7 +159,7 @@ def removeRace(values, result):
     removeRaceMenu = Menu("Cancel", "Select the race to remove")
     
     for race in races:
-        removeRaceMenu.append(race.toString(), SUBTRACT_ONE)
+        removeRaceMenu.addOption(race.toString(), SUBTRACT_ONE)
         
     selection = removeRaceMenu.printMenu(values)
     
@@ -170,12 +173,33 @@ def removeRacerFromRace(values, result):
     replaceRacerMenu = Menu("Cancel", "Select racer to remove")
     
     for racer in racers:
-        replaceRacerMenu.append("{0} - {1}pts".format(racer[0].racerName, racer[1]), SUBTRACT_ONE)
+        replaceRacerMenu.addOption("{0} - {1}pts".format(racer[0].racerName, racer[1]), SUBTRACT_ONE)
     
-    selection = printMenu(values)
+    selection = replaceRacerMenu.printMenu(values)
     
     if selection >= 0:
         r.removeRacer(r.racers[selection])
+    
+    updateRaceMenuHeader(values)
+
+def addRacerToRace(values, result):
+    r = values[RACE]
+    t = values[TOURNAMENT]
+    
+    if len(r.racers) >= t.maxRacers:
+        print("\nThis race already has a maximum of {0} racers.\n".format(t.maxRacers))
+    else:
+        racers = [racer for racer in t.racers if racer not in (racer2[0] for racer2 in r.racers)] #TODO:order this list so it is in order of who is most suitable for this race
+        
+        addRacerMenu = Menu("Cancel", "Select racer to add")
+        
+        for racer in racers:
+            addRacerMenu.addOption("{0}".format(racer.racerName, racer), SUBTRACT_ONE)
+        
+        selection = addRacerMenu.printMenu(values)
+        
+        if selection >= 0:
+            r.addRacer(racers[selection])
 
 def replaceMeWithAppropriateFunction(values, result):
     print("I need to replaced with an appropriate function")
@@ -198,7 +222,7 @@ tournamentMenu.addOption("End tournament", endTournament)
 
 raceMenu = Menu("Cancel race")
 raceMenu.addOption("Replace racer", replaceMeWithAppropriateFunction)
-raceMenu.addOption("Add racer", replaceMeWithAppropriateFunction)
+raceMenu.addOption("Add racer", addRacerToRace)
 raceMenu.addOption("Remove racer", removeRacerFromRace)
 raceMenu.addOption("Start race", replaceMeWithAppropriateFunction)
 
@@ -252,24 +276,6 @@ def raceMenu(t, r):
                 print("Cancelled")
                 
 
-            
-        elif selection == 2:    # add racer
-            if len(r.racers) >= t.maxRacers:
-                print("\nThis race already has a maximum of {0} racers.\n".format(t.maxRacers))
-            else:
-                racers = [racer for racer in t.racers if racer not in (racer2[0] for racer2 in r.racers)] #TODO:order this list so it is in order of who is most suitable for this race
-                
-                addRacerMenu = []
-                addRacerMenu.append("Select racer to add")
-                for racer in racers:
-                    addRacerMenu.append("{0}".format(racer.racerName, racer))
-                
-                selection = printMenu(addRacerMenu, "Cancel")
-                
-                if selection > 0:
-                    r.addRacer(racers[selection - 1])
-                else:
-                    print("Cancelled")
                 
         elif selection == 4:    # start a race and get racer's positions and commit to db
             racers = r.racers.copy()
