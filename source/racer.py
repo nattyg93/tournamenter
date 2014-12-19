@@ -28,3 +28,6 @@ class Racer:
     # TODO
     def findUniqueIDs(self, name):
         pass
+    
+    def toString(self):
+        return "{0}, Created: {1}".format(self.racerName, self.created)
