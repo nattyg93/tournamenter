@@ -25,7 +25,7 @@ class TournamenterDatabase:
             self.racers.append(racer)
     
     def populateRaces(self):
-        self.cursor.execute(SELECT_ALL['racers'])
+        self.cursor.execute(SELECT_ALL['races'])
         for result in self.cursor:
             race = Race(result[0], result[2])
             self.races.append(race)
@@ -37,6 +37,7 @@ class TournamenterDatabase:
                 for racer in self.racers:
                     if racer.pk == result[0]:
                         race.addRacer(racer, result[1])
+            print("pk: {0}, LEN: {1}".format(race.pk, len(race.racers)))
     
     def populateTournaments(self):
         self.cursor.execute(SELECT_ALL['tournaments'])
@@ -55,7 +56,7 @@ class TournamenterDatabase:
             self.cursor.execute(SELECT_ALL['races'])
             for result in self.cursor:
                 for race in self.races:
-                    if race.pk == result[1]:
+                    if race.pk == result[0] and tournament.pk == result[1]:
                         t.addRace(race)
     
     def populateDatabase(self):
@@ -82,6 +83,7 @@ class TournamenterDatabase:
     def addRace(self, race, t):
         if t is not None and race is not None:
             self.races.append(race)
+            t.addRace(race)
             values = {'tournamentID':t.pk, 'timeStarted':race.timeStarted,}
             self.cursor.execute(INSERT['races'], values)
             race.pk = self.cursor.lastrowid
