@@ -56,3 +56,6 @@ class Race:
         for racer in self.racers:
             stringRep += "{0} pos: {1}, ".format(racer[0].racerName, racer[1])
         return stringRep
+    
+    def __lt__(self, other):
+        return self.timeStarted < other.timeStarted
