@@ -19,26 +19,22 @@ class Tournament:
         self.timeEnded = timeEnded
                 
     # Generate and return a new race
-    # TODO
     def generateRace(self):
-        #create and init a new race pass self to the constructer
-        #pick racers for the race with similar scores
-        #pick racers for the race who haven't played recently
-        #return new race
+        
         for racer in self.racers:
-            racer.score = self.calculateScore(racer)
+            racer.score, temp = self.calculateScore(racer)
         
         newRace = Race()
         racersSorted = self.sortOptimal(self.racers)
-        score = racersSorted[0].score
+        averageScore = self.calculateAverageScore(racersSorted[0])
         newRace.addRacer(racersSorted[0])
         del racersSorted[0]
         
-        racersSorted = self.orderBySimilarScore(score, racersSorted)
+        racersSorted = self.orderBySimilarScore(averageScore, racersSorted)
         
         for racer in racersSorted:
-            print("{0}, race: {1}, score: {2}".format(racer.racerName, self.racesSinceLastRaced(racer), racer.score))
-        for index in range(0, self.maxRacers):
+            print("{0}, race: {1}, score: {2}".format(racer.racerName, self.racesSinceLastRaced(racer), self.calculateAverageScore(racer)))
+        for index in range(0, self.maxRacers-1):
             if index < len(racersSorted):
                 newRace.addRacer(racersSorted[index])
         return newRace
@@ -58,19 +54,30 @@ class Tournament:
         return lastRaced
     
     def sortOptimal(self, racers):
-        return sorted(racers, key = lambda x: (0-self.racesSinceLastRaced(x), x.score))  #sorted by last raced in reverse order then by the score (least points first)
+        return sorted(racers, key = lambda x: (0-self.racesSinceLastRaced(x), self.calculateAverageScore(x)))  #sorted by last raced in reverse order then by the score (least points first)
     
     # Generate a list of racers ordered by closeness of their scores
-    def orderBySimilarScore(self, score, racers):
-        return sorted(racers, key = lambda x: (abs(score-x.score), 0-self.racesSinceLastRaced(x)))    #sorted by closest score then by when they last raced
+    def orderBySimilarScore(self, averageScore, racers):
+        return sorted(racers, key = lambda x: (abs(averageScore-self.calculateAverageScore(x)), 0-self.racesSinceLastRaced(x)))    #sorted by closest score then by when they last raced
     
     # Calculate score of passed racer based on the list of races
     def calculateScore(self, racer):
         score = 0
+        numberOfRaces = 0
         for race in self.races:
-            score += race.getPointsForRacer(racer, self.maxRacers)
+            points = race.getPointsForRacer(racer, self.maxRacers)
+            score += points
+            if points > 0:
+                numberOfRaces += 1
         
-        return score
+        return score, numberOfRaces
+    
+    def calculateAverageScore(self, racer):
+        score, num = self.calculateScore(racer)
+        if num > 0:
+            return score/num
+        else:
+            return 0
     
     # Indicate the tournament has ended by setting the end time
     def endTournament(self):
