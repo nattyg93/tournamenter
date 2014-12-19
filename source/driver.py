@@ -289,7 +289,7 @@ def selectExistingTournament(values, result):
     existingTournamentMenu = Menu("Cancel", "Select the tournament:")
     
     for tournament in selectedTournaments:
-        existingTournamentMenu.addOption(tournament.toString(), lambda x: x - 1)
+        existingTournamentMenu.addOption(tournament.toString(), lambda x, y: y - 1)
     
     selection = existingTournamentMenu.printMenu(values)
     
@@ -299,8 +299,8 @@ def selectExistingTournament(values, result):
             if confirm("This tournament is closed. Do you want to open it?"):
                 tDB.openTournament(tournament)
         
-        setCurrentTournament(values, currentTournament)
-        tournamentMenu.printMenu(values)
+        setCurrentTournament(values, tournament)
+        tournamentMenu.infinitePrintMenu(values)
 
 def setCurrentTournament(values, tournament):
     values[TOURNAMENT] = tournament
@@ -332,11 +332,7 @@ if __name__ == "__main__":
     tDB.populateRaces()
     tDB.populateTournaments()
     
-    _result = 0
-    
-    while not _result == -1:
-        print("\n")
-        _result = topMenu.printMenu(values)
+    topMenu.infinitePrintMenu(values)
         
 
 
