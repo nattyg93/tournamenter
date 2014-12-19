@@ -34,6 +34,8 @@ class Menu:
         
         if result > 0:
             return self.options[result - 1][1](values, result)
+        else:
+            return -1
     
     def addOption(self, string, func):
         self.options.append((string, func))
