@@ -115,7 +115,13 @@ class TournamenterDatabase:
             values = {'tournamentID':t.pk, 'racerID':racer.pk, 'exited':datetime.now()}
             self.cursor.execute(QUERY['removeRacerFromTournament'], values)
             self.cnx.commit()
-            
+    
+    def removeRace(self, t, race):
+        if race is not None and t is not None:
+            t.removeRace(race)
+            values = {'id':race.pk}
+            self.cursor.execute(DELETE['races'], values)
+            self.cnx.commit()
     
     def endTournament(self, t):
         if t is not None:
