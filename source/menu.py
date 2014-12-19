@@ -37,7 +37,7 @@ class Menu:
             return self.options[result - 1][1](values, result)
         else:
             self._result = 0
-            return 0
+            return -1
     
     def infinitePrintMenu(self, values):
         self._result = None
