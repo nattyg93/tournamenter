@@ -203,6 +203,8 @@ def addRacerToRace(values, result):
         
         if selection >= 0:
             r.addRacer(racers[selection])
+        
+        updateRaceMenuHeader(values)
 
 def startRace(values, result):
     r = values[RACE]
@@ -227,6 +229,35 @@ def startRace(values, result):
         tDB.addRace(r, t)
         raceMenu._result = 0
 
+def replaceRacerInRace(values, result):
+    r = values[RACE]
+    t = values[TOURNAMENT]
+    replaceRacerMenu = Menu("Cancel", "Select racer to replace")
+    
+    for racer in r.racers:
+        replaceRacerMenu.addOption("{0} - {1}pts".format(racer[0].racerName, racer[1]), SUBTRACT_ONE)
+    
+    selection = replaceRacerMenu.printMenu(values)
+    
+    if selection >= 0:
+        toReplace = r.racers[selection][0]
+        
+        replaceRacerMenu = Menu("Cancel", "Select racer to add")
+        # This allows adding duplicates to a race.
+        racers = [racer for racer in t.racers if racer not in (racer2[0] for racer2 in r.racers)] #TODO: order this list so it is in order of who is most suitable for this race
+        
+        for racer in racers:
+            # I am not sure how score is been tracked in the tournament class.
+            replaceRacerMenu.addOption("{0}".format(racer.racerName), SUBTRACT_ONE)
+            
+        selection = replaceRacerMenu.printMenu(values)
+        
+        if selection >= 0:
+            toAdd = racers[selection]
+            r.replaceRacer(toReplace, toAdd)
+        
+        updateRaceMenuHeader(values)
+
 def replaceMeWithAppropriateFunction(values, result):
     print("I need to replaced with an appropriate function")
 
@@ -247,7 +278,7 @@ tournamentMenu.addOption("Show leader board", replaceMeWithAppropriateFunction)
 tournamentMenu.addOption("End tournament", endTournament)
 
 raceMenu = Menu("Cancel race")
-raceMenu.addOption("Replace racer", replaceMeWithAppropriateFunction)
+raceMenu.addOption("Replace racer", replaceRacerInRace)
 raceMenu.addOption("Add racer", addRacerToRace)
 raceMenu.addOption("Remove racer", removeRacerFromRace)
 raceMenu.addOption("Start race", startRace)
@@ -263,44 +294,4 @@ if __name__ == "__main__":
         
 
 
-"""
-# @param t: Tournament
-# @param r: Race
-#NOTE: This needs to be broken up in MANY smaller functions.
-def raceMenu(t, r):
-    while True:
-       
-        elif selection == 1:    # Replace
-            replaceRacerMenu = []
-            replaceRacerMenu.append("Select racer to replace")
-            for racer in r.racers:
-                replaceRacerMenu.append("{0} - {1}pts".format(racer[0].racerName, racer[1]))
-            
-            selection = printMenu(replaceRacerMenu, "Cancel")
-            
-            if selection > 0:
-                toReplace = r.racers[selection - 1][0]
-            else:
-                print("Cancelled")
-                
-            replaceRacerMenu = []
-            replaceRacerMenu.append("Select racer to add")
-            # This allows adding duplicates to a race.
-            racers = [racer for racer in t.racers if racer not in (racer2[0] for racer2 in r.racers)] #order this list so it is in order of who is most suitable for this race
-            
-            for racer in racers:
-                print(racer)
-                # I am not sure how score is been tracked in the tournament class.
-                replaceRacerMenu.append("{0}".format(racer.racerName))
-                
-            selection = printMenu(replaceRacerMenu, "Cancel")
-            
-            if selection > 0:
-                toAdd = racers[selection - 1]
-                r.replaceRacer(toReplace, toAdd)
-            else:
-                print("Cancelled")
-                
 
-
-"""
