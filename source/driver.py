@@ -247,6 +247,7 @@ def listRacers(values, result):
     print("List of existing racers:")
     for racer in tDB.racers:
         print(racer.toString())
+    print("\nNumber of racers: {0}".format(len(tDB.racers)))
 
 def createNewTournament():
     gameName = input("Enter Game Name: ")
