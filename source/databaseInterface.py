@@ -5,7 +5,7 @@
 import mysql.connector
 from mysql.connector import errorcode
 
-#cnx = mysql.connector.connect(user='tournamenter', password='tournamenter', host='bismarck')
+#cnx = mysql.connector.connect(user='tournamenter', password='tournamenter', host='localhost')
 
 #curs = cnx.cursor()
 
@@ -147,7 +147,7 @@ QUERY['racersStillInTournament'] = ("SELECT racerID FROM racerInTournament WHERE
 QUERY['racersInRace'] = ("SELECT racerID, position FROM racerInRace WHERE raceID = %(raceID)s")
 
 def createDatabase():
-    cnx = mysql.connector.connect(user='tournamenter', password='tournamenter', host='bismarck')
+    cnx = mysql.connector.connect(user='tournamenter', password='tournamenter', host='localhost')
     
     curs = cnx.cursor()
     

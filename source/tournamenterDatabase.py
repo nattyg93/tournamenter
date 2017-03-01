@@ -13,7 +13,7 @@ class TournamenterDatabase:
         self.tournaments = []
         self.racers = []
         self.races = []
-        self.cnx = mysql.connector.connect(user='tournamenter', password='tournamenter', host='bismarck')
+        self.cnx = mysql.connector.connect(user='tournamenter', password='tournamenter', host='localhost')
         createDatabase()
         self.cursor = self.cnx.cursor()
         self.cursor.execute(USE)
