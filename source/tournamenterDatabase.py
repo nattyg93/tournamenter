@@ -37,7 +37,6 @@ class TournamenterDatabase:
                 for racer in self.racers:
                     if racer.pk == result[0]:
                         race.addRacer(racer, result[1])
-            print("pk: {0}, LEN: {1}".format(race.pk, len(race.racers)))
     
     def populateTournaments(self):
         self.cursor.execute(SELECT_ALL['tournaments'])
@@ -103,7 +102,6 @@ class TournamenterDatabase:
             values = {'tournamentID':t.pk, 'racerID':racer.pk}
             self.cursor.execute(SELECT['racerInTournament'], values)
             values = {'tournamentID':t.pk, 'racerID':racer.pk, 'entered':datetime.now(), 'exited':None}
-            print("{0}, {1}".format(t.pk, racer.pk))
             if self.cursor.fetchone() is None:
                 self.cursor.execute(INSERT['racerInTournament'], values)
             else:

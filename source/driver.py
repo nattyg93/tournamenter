@@ -217,7 +217,6 @@ def startRace(values, result):
             winnerMenu = Menu("Cancel", "Select racer that came in position {0}".format(count))
             for racer in racers:
                 winnerMenu.addOption(racer[0].racerName, SUBTRACT_ONE)
-            print("Len: {0}".format(len(r.racers)))
             selection = winnerMenu.printMenu(values)
             
             if selection >= 0:
