@@ -37,7 +37,6 @@ class TournamenterDatabase:
                 for racer in self.racers:
                     if racer.pk == result[0]:
                         race.addRacer(racer, result[1])
-            print("pk: {0}, LEN: {1}".format(race.pk, len(race.racers)))
     
     def populateTournaments(self):
         self.cursor.execute(SELECT_ALL['tournaments'])
@@ -66,11 +65,11 @@ class TournamenterDatabase:
         
     def addTournament(self, t):
         if t is not None:
-            self.tournaments.append(t)
             values = {'gameName':t.gameName, 'maxRacers':t.maxRacers, 'timeStarted':t.timeStarted, 'timeEnded':t.timeEnded}
             self.cursor.execute(INSERT['tournaments'], values)
             t.pk = self.cursor.lastrowid
             self.cnx.commit()
+            self.tournaments.append(t)
             
     def addRacer(self, racer):
         if racer is not None:
@@ -82,7 +81,6 @@ class TournamenterDatabase:
             
     def addRace(self, race, t):
         if t is not None and race is not None:
-            self.races.append(race)
             t.addRace(race)
             values = {'tournamentID':t.pk, 'timeStarted':race.timeStarted,}
             self.cursor.execute(INSERT['races'], values)
@@ -91,6 +89,7 @@ class TournamenterDatabase:
             for racer in race.racers:
                 self.addRacerInRace(racer[0], race, racer[1])
             self.cnx.commit()
+            self.races.append(race)
             
     def addRacerInRace(self, racer, race, position):
         if racer is not None and race is not None:
@@ -100,41 +99,40 @@ class TournamenterDatabase:
             
     def addRacerInTournament(self, t, racer):
         if racer is not None and t is not None:
-            t.addRacer(racer)
             values = {'tournamentID':t.pk, 'racerID':racer.pk}
             self.cursor.execute(SELECT['racerInTournament'], values)
             values = {'tournamentID':t.pk, 'racerID':racer.pk, 'entered':datetime.now(), 'exited':None}
-            print("{0}, {1}".format(t.pk, racer.pk))
             if self.cursor.fetchone() is None:
                 self.cursor.execute(INSERT['racerInTournament'], values)
             else:
                 self.cursor.execute(QUERY['reAddRacerInTournament'], values)
             self.cnx.commit()
+            t.addRacer(racer)
             
     def removeRacerFromTournament(self, t, racer):
         if racer is not None and t is not None:
-            t.removeRacer(racer)
             values = {'tournamentID':t.pk, 'racerID':racer.pk, 'exited':datetime.now()}
             self.cursor.execute(QUERY['removeRacerFromTournament'], values)
             self.cnx.commit()
+            t.removeRacer(racer)
     
     def removeRace(self, t, race):
         if race is not None and t is not None:
-            t.removeRace(race)
             values = {'id':race.pk}
             self.cursor.execute(DELETE['races'], values)
             self.cnx.commit()
+            t.removeRace(race)
     
     def endTournament(self, t):
         if t is not None:
-            t.endTournament()
             values = {'id':t.pk, 'timeEnded':t.timeEnded}
             self.cursor.execute(QUERY['endTournament'], values)
             self.cnx.commit()
+            t.endTournament()
             
     def openTournament(self, t):
         if t is not None:
-            t.openTournament()
             values = {'id':t.pk, 'timeEnded':t.timeEnded}
             self.cursor.execute(QUERY['openTournament'], values)
             self.cnx.commit()
+            t.openTournament()
