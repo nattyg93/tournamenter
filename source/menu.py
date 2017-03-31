@@ -67,3 +67,13 @@ def confirm(questionToConfirm, yes = "Yes", no = "No"):
             print("\nPlease enter either 0 or 1.\n")
     
     return result == 1
+
+def getInput(question):
+    inputText = ""
+    
+    while not inputText:
+        inputText = input(question)
+        if not inputText:
+            print("\nYou must enter some text.\n")
+    
+    return inputText
