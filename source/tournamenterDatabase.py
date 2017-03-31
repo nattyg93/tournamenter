@@ -74,11 +74,11 @@ class TournamenterDatabase:
             
     def addRacer(self, racer):
         if racer is not None:
-            self.racers.append(racer)
             values = {'racerName':racer.racerName, 'created':racer.created,}
             self.cursor.execute(INSERT['racers'], values)
             racer.pk = self.cursor.lastrowid
             self.cnx.commit()
+            self.racers.append(racer)
             
     def addRace(self, race, t):
         if t is not None and race is not None:
