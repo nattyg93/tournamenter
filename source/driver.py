@@ -4,8 +4,7 @@
 
 from tournament import Tournament
 from constants import *
-from menu import Menu
-from menu import confirm
+from menu import *
 from race import Race
 from racer import Racer
 from databaseInterface import *
@@ -14,7 +13,7 @@ from mysql.connector import errorcode
 
 
 def createNewRacer():
-    racerName = input("Enter Racer Name: ")
+    racerName = getInput("Enter Racer Name: ")
     
     if confirm("Create racer with the name \"{0}\"?".format(racerName)):
         racer = Racer(racerName)
@@ -45,7 +44,7 @@ def listRacers(values, result):
     print("\nNumber of racers: {0}".format(len(tDB.racers)))
 
 def createNewTournament():
-    gameName = input("Enter Game Name: ")
+    gameName = getInput("Enter Game Name: ")
     maxRacers = 0
     while maxRacers < 1:
         try:
