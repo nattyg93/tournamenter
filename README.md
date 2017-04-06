@@ -26,5 +26,4 @@ If someone is eating pizza or just feels like sitting out for a round, the Racer
 
 ### Known Issues:
 
- * Blank names for Tournaments and Racers can be entered.
  * The current algorithm for determining which Racers should be in a Race is quite simple and as such does not currently satisfy the first criteria listed above.
